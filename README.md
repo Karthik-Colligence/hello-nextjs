@@ -1,36 +1,107 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Hello Next.js
 
-## Getting Started
+A beautiful Hello World application built with Next.js, TypeScript, and Tailwind CSS.
 
-First, run the development server:
+## 🚀 Features
 
+- **Next.js 15** with App Router
+- **TypeScript** for type safety
+- **Tailwind CSS** for styling
+- **Turbopack** for fast development
+- **ESLint** for code quality
+- **Responsive Design** for all devices
+- **CI/CD Pipeline** with GitHub Actions
+- **Multi-environment deployments** via Vercel
+
+## 📋 Getting Started
+
+### Prerequisites
+
+- Node.js 18+ 
+- npm or yarn
+- Git
+
+### Installation
+
+1. Clone the repository:
+```bash
+git clone https://github.com/Karthik-Colligence/hello-nextjs.git
+cd hello-nextjs
+```
+
+2. Install dependencies:
+```bash
+npm install
+```
+
+3. Run the development server:
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 🛠️ Available Scripts
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- `npm run dev` - Start development server with Turbopack
+- `npm run build` - Build for production
+- `npm start` - Start production server
+- `npm run lint` - Run ESLint
+- `npm run type-check` - Run TypeScript type checking
+- `npm test` - Run tests
 
-## Learn More
+## 🌐 Deployment
 
-To learn more about Next.js, take a look at the following resources:
+This project uses a multi-environment deployment strategy:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Environments
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- **Production**: [https://hello-nextjs.vercel.app](https://hello-nextjs.vercel.app)
+- **Staging**: [https://hello-nextjs-staging.vercel.app](https://hello-nextjs-staging.vercel.app)
+- **Preview**: Dynamic URLs for pull requests
 
-## Deploy on Vercel
+### Deployment Process
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+1. **Feature Development**: Create PR → Automatic preview deployment
+2. **Staging**: Merge to `staging` branch → Automatic staging deployment
+3. **Production**: Merge to `main` branch → Automatic production deployment
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 🔧 CI/CD Pipeline
+
+The project includes GitHub Actions workflows for:
+
+- **Pull Request Preview**: Automatic deployments for code review
+- **Staging Deployment**: QA and testing environment
+- **Production Deployment**: Final production releases with GitHub releases
+
+See [CI-CD-WORKFLOW.md](./CI-CD-WORKFLOW.md) for detailed documentation.
+
+## 📁 Project Structure
+
+```
+hello-nextjs/
+├── src/
+│   ├── app/           # Next.js app directory
+│   └── components/    # React components
+├── public/            # Static assets
+├── .github/           # GitHub Actions workflows
+└── vercel.json       # Vercel configuration
+```
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## 📝 License
+
+This project is licensed under the MIT License.
+
+## 🙏 Acknowledgments
+
+- Built with [Next.js](https://nextjs.org/)
+- Deployed on [Vercel](https://vercel.com/)
+- Styled with [Tailwind CSS](https://tailwindcss.com/)

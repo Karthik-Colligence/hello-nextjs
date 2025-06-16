@@ -110,3 +110,8 @@ pnpm-lock.yaml.backup
 
 # Storybook
 storybook-static/
+
+# MCP Configuration
+.env.mcp
+mcp-servers/
+.mcp.json

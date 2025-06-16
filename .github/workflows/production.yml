@@ -82,7 +82,6 @@ jobs:
           echo "Building for preview environment..."
           vercel build --token=${{ secrets.VERCEL_TOKEN }}
         env:
-          NODE_ENV: development
           NEXT_PUBLIC_ENV: preview
 
       - name: Deploy Preview
@@ -154,7 +153,6 @@ jobs:
           echo "Building for production environment..."
           vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
         env:
-          NODE_ENV: production
           NEXT_PUBLIC_ENV: production
 
       - name: Deploy to Production

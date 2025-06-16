@@ -177,6 +177,8 @@ jobs:
     needs: deploy-production
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -199,24 +201,20 @@ jobs:
           echo "EOF" >> $GITHUB_OUTPUT
 
       - name: Create Release
-        uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: v${{ github.run_number }}
-          release_name: Production Release v${{ github.run_number }}
-          body: |
-            ## Production Deployment
+        run: |
+          gh release create v${{ github.run_number }} \
+            --title "Production Release v${{ github.run_number }}" \
+            --notes "## Production Deployment
             
-            **Deployment URL:** https://hello-nextjs.vercel.app
-            **Commit:** ${{ github.sha }}
-            
-            ### Changes in this release:
-            ```
-            ${{ steps.release_notes.outputs.commits }}
-            ```
-            
-            ---
-            *Automated release from GitHub Actions*
-          draft: false
-          prerelease: false
+          **Deployment URL:** https://hello-nextjs.vercel.app
+          **Commit:** ${{ github.sha }}
+          
+          ### Changes in this release:
+          \`\`\`
+          ${{ steps.release_notes.outputs.commits }}
+          \`\`\`
+          
+          ---
+          *Automated release from GitHub Actions*"

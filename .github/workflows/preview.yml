@@ -3,12 +3,12 @@ name: Preview Deployment
 on:
   push:
     branches:
-      - develop
+      - dev
   pull_request:
     branches:
       - main
       - staging
-      - develop
+      - dev
     types: [opened, synchronize, reopened]
 
 env:

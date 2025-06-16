@@ -1,0 +1,187 @@
+name: Dev Deployment
+
+on:
+  push:
+    branches:
+      - dev
+  pull_request:
+    branches:
+      - dev
+    types:
+      - opened
+      - synchronize
+      - reopened
+
+env:
+  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+jobs:
+  test-and-lint:
+    name: Test and Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run ESLint
+        run: npm run lint
+
+      - name: Run TypeScript type check
+        run: npx tsc --noEmit
+
+      - name: Run tests
+        run: |
+          if [ -f "package.json" ] && grep -q "\"test\":" package.json; then
+            npm test -- --passWithNoTests
+          else
+            echo "No test script found, skipping tests"
+          fi
+
+      - name: Build test
+        run: npm run build
+
+  deploy-preview:
+    name: Deploy Preview
+    needs: test-and-lint
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Vercel CLI
+        run: npm install -g vercel
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Pull Vercel Environment Information
+        run: vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Build Project Artifacts
+        run: |
+          echo "Building for preview environment..."
+          vercel build --token=${{ secrets.VERCEL_TOKEN }}
+        env:
+          NEXT_PUBLIC_ENV: preview
+
+      - name: Deploy Preview
+        id: deploy
+        run: |
+          echo "Deploying preview for PR #${{ github.event.pull_request.number }}..."
+          DEPLOYMENT_URL=$(vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }})
+          echo "deployment_url=$DEPLOYMENT_URL" >> $GITHUB_OUTPUT
+          echo "Preview deployment complete: $DEPLOYMENT_URL"
+
+      - name: Comment PR
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const deploymentUrl = '${{ steps.deploy.outputs.deployment_url }}';
+            const comment = `## 🚀 Preview Deployment Ready!
+            
+            **Preview URL:** ${deploymentUrl}
+            **Target Branch:** ${{ github.base_ref }}
+            **Source Branch:** ${{ github.head_ref }}
+            **Commit:** ${{ github.event.pull_request.head.sha }}
+            
+            ### CI/CD Status:
+            - ✅ Tests passed
+            - ✅ Linting passed
+            - ✅ Type checking passed
+            - ✅ Build successful
+            - ✅ Preview deployed
+            
+            ---
+            *This preview will be updated automatically with new commits.*`;
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+
+  deploy-dev:
+    name: Deploy to Dev
+    needs: test-and-lint
+    if: github.event_name == 'push' && github.ref == 'refs/heads/dev'
+    runs-on: ubuntu-latest
+    environment:
+      name: development
+      url: https://hello-nextjs-dev.vercel.app
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Vercel CLI
+        run: npm install -g vercel
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Pull Vercel Environment Information
+        run: vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Build Project Artifacts
+        run: |
+          echo "Building for dev environment..."
+          vercel build --token=${{ secrets.VERCEL_TOKEN }}
+        env:
+          NEXT_PUBLIC_ENV: development
+
+      - name: Deploy to Dev
+        run: |
+          echo "Deploying to dev environment..."
+          DEPLOYMENT_URL=$(vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }} --alias=hello-nextjs-dev.vercel.app)
+          echo "Dev deployment complete: $DEPLOYMENT_URL"
+
+      - name: Create deployment summary
+        run: |
+          echo "## 🚀 Dev Deployment Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Environment:** Development" >> $GITHUB_STEP_SUMMARY
+          echo "- **URL:** https://hello-nextjs-dev.vercel.app" >> $GITHUB_STEP_SUMMARY
+          echo "- **Branch:** dev" >> $GITHUB_STEP_SUMMARY
+          echo "- **Commit:** ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Deployed by:** @${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Deployment time:** $(date)" >> $GITHUB_STEP_SUMMARY
+
+  notify-deployment:
+    name: Notify Deployment Status
+    needs: deploy-dev
+    runs-on: ubuntu-latest
+    if: always() && github.event_name == 'push'
+    steps:
+      - name: Send deployment notification
+        run: |
+          if [ "${{ needs.deploy-dev.result }}" == "success" ]; then
+            echo "✅ Dev deployment successful!"
+          else
+            echo "❌ Dev deployment failed!"
+          fi

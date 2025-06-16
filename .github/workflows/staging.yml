@@ -155,8 +155,10 @@ jobs:
       - name: Deploy to Staging
         run: |
           echo "Deploying to staging environment..."
-          DEPLOYMENT_URL=$(vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }} --alias=hello-nextjs-staging.vercel.app)
+          DEPLOYMENT_URL=$(vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }})
           echo "Staging deployment complete: $DEPLOYMENT_URL"
+          echo "Setting up alias..."
+          vercel alias set $DEPLOYMENT_URL hello-nextjs-staging.vercel.app --token=${{ secrets.VERCEL_TOKEN }}
 
       - name: Create deployment summary
         run: |
